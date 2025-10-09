@@ -1,0 +1,46 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String     @id @default(auto()) @map("_id") @db.ObjectId
+  name          String
+  email         String     @unique
+  token         String?
+
+  projects      Project[]
+}
+
+model Project {
+  id             String    @id @default(auto()) @map("_id") @db.ObjectId
+  userId         String    @db.ObjectId
+  projectName    String    @map("project_name")
+  repoUrl        String    @map("repo_url")
+  description    String?
+  createdAt      DateTime  @default(now()) @map("created_at")
+  latestSbomId   String?   @map("latest_sbom_id") @db.ObjectId
+  tags           String[]
+
+  user           User      @relation(fields: [userId], references: [id])
+  sboms          Sbom[]
+}
+
+model Sbom {
+  id                  String   @id @default(auto()) @map("_id") @db.ObjectId
+  projectId           String   @db.ObjectId
+  storageUrl          String   @map("storage_url")
+  format              String
+  tool                String
+  commitHash          String   @map("commit_hash")
+  generatedAt         DateTime @default(now()) @map("generated_at")
+  componentsCount     Int      @map("components_count")
+  vulnerabilitiesFound Int     @map("vulnerabilities_found")
+
+  project             Project  @relation(fields: [projectId], references: [id])
+}
