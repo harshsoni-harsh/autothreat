@@ -1,2 +1,2 @@
 pnpm dotenvx encrypt
-git add .env
+git update-index --again
