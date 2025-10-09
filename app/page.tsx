@@ -16,11 +16,11 @@ export default function Home() {
         </div>
         <div>
           {user ? (
-            <Link href="/dashboard">
+            <Link prefetch={false} href="/dashboard">
               <button style={{ padding: '0.5rem 1rem', fontSize: '1rem' }}>Dashboard</button>
             </Link>
           ) : (
-            <Link href="/auth/login">
+            <Link prefetch={false} href="/auth/login">
               <button style={{ padding: '0.5rem 1rem', fontSize: '1rem' }}>Login</button>
             </Link>
           )}

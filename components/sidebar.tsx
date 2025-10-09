@@ -42,11 +42,11 @@ export function Sidebar({ user }: SidebarProps) {
                 </Card>
 
                 <div className="font-medium text-sm border -z-10 absolute group-hover:bottom-full group-hover:-top-full inset-0 bg-card/95 backdrop-blur-sm rounded-lg transition-all duration-500 grid grid-cols-2 items-center justify-center gap-2 p-2 pointer-events-none group-hover:pointer-events-auto opacity-0 group-hover:opacity-100 ease-[cubic-bezier(0.4,0,0.2,1)] [&>*]:hover:bg-accent [&>*]:rounded-md">
-                    <Link href="/profile" className="flex-1 flex flex-col items-center hover:bg-accent rounded-md py-2 px-4" tabIndex={-1}>
+                    <Link prefetch={false} href="/profile" className="flex-1 flex flex-col items-center hover:bg-accent rounded-md py-2 px-4" tabIndex={-1}>
                         <User className="h-4 w-4" />
                         Profile
                     </Link>
-                    <Link href="/auth/logout" className="flex-1 flex flex-col items-center hover:bg-accent rounded-md py-2 px-4" tabIndex={-1}>
+                    <Link prefetch={false} href="/auth/logout" className="flex-1 flex flex-col items-center hover:bg-accent rounded-md py-2 px-4" tabIndex={-1}>
                         <LogOut className="h-4 w-4" />
                         Logout
                     </Link>

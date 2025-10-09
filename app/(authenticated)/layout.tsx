@@ -1,6 +1,7 @@
 import { auth0 } from "@/lib/auth0";
 import { Sidebar } from "@/components/sidebar"
 import { PrismaClient } from "@/generated/prisma";
+import { redirect } from "next/navigation";
 
 const prisma = new PrismaClient();
 
@@ -9,9 +10,9 @@ export default async function Layout({
 }: Readonly<{
     children: React.ReactNode;
 }>) {
-    const session = await auth0.getSession(); 
+    const session = await auth0.getSession();
     if (!session || !session.user) {
-        return <div>Please log in to access this page.</div>;
+        redirect('/auth/login');
     }
     const user = session.user;
     try {
@@ -31,9 +32,9 @@ export default async function Layout({
     }
 
     return (
-        <div className="flex min-h-screen">
+        <div className="flex min-h-screen max-w-screen">
             <Sidebar user={{ name: user?.name, email: user?.email, picture: user?.picture as string | undefined }} />
-            <main className="flex-1 p-6">
+            <main className="flex-1 p-6 overflow-auto">
                 {children}
             </main>
         </div>
