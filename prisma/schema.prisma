@@ -9,38 +9,51 @@ datasource db {
 }
 
 model User {
-  id            String     @id @default(auto()) @map("_id") @db.ObjectId
-  name          String
-  email         String     @unique
-  token         String?
+  id    String  @id @default(auto()) @map("_id") @db.ObjectId
+  name  String
+  email String  @unique
 
-  projects      Project[]
+  projects Project[]
+  tokens   Token[]
+}
+
+model Token {
+  id          String    @id @default(auto()) @map("_id") @db.ObjectId
+  userId      String    @db.ObjectId
+  name        String
+  token       String    @unique
+  description String?
+  createdAt   DateTime  @default(now()) @map("created_at")
+  lastUsed    DateTime? @map("last_used")
+  expiresAt   DateTime? @map("expires_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model Project {
-  id             String    @id @default(auto()) @map("_id") @db.ObjectId
-  userId         String    @db.ObjectId
-  projectName    String    @map("project_name")
-  repoUrl        String    @map("repo_url")
-  description    String?
-  createdAt      DateTime  @default(now()) @map("created_at")
-  latestSbomId   String?   @map("latest_sbom_id") @db.ObjectId
-  tags           String[]
+  id           String   @id @default(auto()) @map("_id") @db.ObjectId
+  userId       String   @db.ObjectId
+  projectName  String   @map("project_name")
+  repoUrl      String   @map("repo_url")
+  description  String?
+  createdAt    DateTime @default(now()) @map("created_at")
+  latestSbomId String?  @map("latest_sbom_id") @db.ObjectId
+  tags         String[]
 
-  user           User      @relation(fields: [userId], references: [id])
-  sboms          Sbom[]
+  user  User   @relation(fields: [userId], references: [id])
+  sboms Sbom[]
 }
 
 model Sbom {
-  id                  String   @id @default(auto()) @map("_id") @db.ObjectId
-  projectId           String   @db.ObjectId
-  storageUrl          String   @map("storage_url")
-  format              String
-  tool                String
-  commitHash          String   @map("commit_hash")
-  generatedAt         DateTime @default(now()) @map("generated_at")
-  componentsCount     Int      @map("components_count")
-  vulnerabilitiesFound Int     @map("vulnerabilities_found")
+  id                   String   @id @default(auto()) @map("_id") @db.ObjectId
+  projectId            String   @db.ObjectId
+  storageUrl           String   @map("storage_url")
+  format               String
+  tool                 String
+  commitHash           String   @map("commit_hash")
+  generatedAt          DateTime @default(now()) @map("generated_at")
+  componentsCount      Int      @map("components_count")
+  vulnerabilitiesFound Int      @map("vulnerabilities_found")
 
-  project             Project  @relation(fields: [projectId], references: [id])
+  project Project @relation(fields: [projectId], references: [id])
 }

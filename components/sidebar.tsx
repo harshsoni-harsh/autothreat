@@ -1,7 +1,7 @@
 "use client"
 import Link from "next/link"
 import Image from "next/image"
-import { Avatar } from "@/components/ui/avatar"
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar"
 import { Card, CardContent } from "@/components/ui/card"
 import { User, LogOut } from "lucide-react"
 
@@ -33,7 +33,10 @@ export function Sidebar({ user }: SidebarProps) {
             <div className="relative group z-0">
                 <Card className="cursor-pointer transition-all duration-200 hover:shadow-lg mt-2">
                     <CardContent className="flex items-center gap-3 p-3">
-                        <Avatar src={user?.picture ?? "/vercel.svg"} alt={user?.name ?? "User"} />
+                        <Avatar>
+                            <AvatarImage src={user?.picture ?? "/vercel.svg"} alt={user?.name ?? "User"} />
+                            <AvatarFallback>{user?.name?.charAt(0) || "U"}</AvatarFallback>
+                        </Avatar>
                         <div className="min-w-0">
                             <p className="truncate text-sm font-medium">{user?.name ?? "User"}</p>
                             <p className="truncate text-xs text-muted-foreground">{user?.email ?? ""}</p>

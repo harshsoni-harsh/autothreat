@@ -6,7 +6,9 @@
     "prepare": "husky",
     "dev": "dotenvx run -- next dev --turbopack",
     "build": "dotenvx run -- next build",
-    "start": "dotenvx run -- next start"
+    "start": "dotenvx run -- next start",
+    "db:push": "dotenvx run -- prisma db push",
+    "db:generate": "dotenvx run -- prisma generate"
   },
   "dependencies": {
     "@auth0/nextjs-auth0": "^4.10.0",
