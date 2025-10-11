@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { PrismaClient } from '@/generated/prisma'
+import { s3Service } from '@/lib/s3'
 
 const prisma = new PrismaClient()
 
@@ -16,7 +17,7 @@ export async function POST(request: NextRequest) {
         if (!apiKey) {
             return NextResponse.json({ error: 'API key is required' }, { status: 401 })
         }
-        
+
         // Find user by API key
         const token = await prisma.token.findUnique({
             where: { token: apiKey },
@@ -72,9 +73,21 @@ export async function POST(request: NextRequest) {
         const componentsCount = (sbom.packages?.length ?? sbom.components.length) || 0
         const vulnerabilitiesFound = 0
 
-        // Store SBOM data (in a real implementation, you'd store this in cloud storage)
-        // For now, we'll store a reference
-        const storageUrl = `sbom_${project.id}_${Date.now()}.json`
+        // Upload SBOM to S3 or store locally if S3 not configured
+        let storageUrl: string
+        try {
+            if (s3Service.isConfigured()) {
+                storageUrl = await s3Service.uploadSBOM(sbom, project.id, sbomId)
+                console.log(`SBOM uploaded to S3: ${storageUrl}`)
+            } else {
+                // Fallback: store reference if S3 not configured
+                storageUrl = `local_sbom_${project.id}_${Date.now()}.json`
+                console.warn('S3 not configured, storing local reference. Configure AWS credentials for cloud storage.')
+            }
+        } catch (error) {
+            console.error('Failed to upload SBOM to S3, using local reference:', error)
+            storageUrl = `local_sbom_${project.id}_${Date.now()}.json`
+        }
 
         // Create SBOM record
         const newSbom = await prisma.sbom.create({
@@ -103,6 +116,8 @@ export async function POST(request: NextRequest) {
             project: projectName,
             sbomId: newSbom.id,
             componentsCount: componentsCount,
+            storageUrl: storageUrl,
+            storageType: storageUrl.startsWith('https://') ? 's3' : 'local',
             syncedAt: new Date().toISOString()
         }, { status: 201 })
 

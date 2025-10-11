@@ -42,3 +42,8 @@ yarn-error.log*
 next-env.d.ts
 
 /generated/prisma
+
+# disallow other package managers
+bun.lock*
+yarn.lock
+package-lock.json

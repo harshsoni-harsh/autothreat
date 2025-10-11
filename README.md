@@ -1,36 +1,124 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# AutoThreat
+
+A comprehensive security platform for managing software vulnerabilities and SBOMs (Software Bill of Materials).
+
+## Features
+
+- 🔐 **Authentication**: Auth0 integration for secure user management
+- 📊 **Dashboard**: Overview of projects and vulnerabilities
+- 🏷️ **Token Management**: API token generation and management
+- 📦 **SBOM Management**: Upload and analyze Software Bill of Materials
+- ☁️ **Cloud Storage**: AWS S3 integration for SBOM storage
+- 🎯 **GitHub Actions**: Automated security scanning workflows
 
 ## Getting Started
 
-First, run the development server:
+### Prerequisites
+
+- Node.js 24+
+- MongoDB database
+- AWS account (for S3 storage)
+
+### Installation
+
+1. **Clone the repository**
+   ```bash
+   git clone https://github.com/harshsoni-harsh/autothreat.git
+   cd autothreat
+   ```
+
+2. **Install dependencies**
+   ```bash
+   npm install
+   ```
+
+3. **Environment Setup**
+   Configure the following environment variables:
+   ```env
+   # Database
+   DATABASE_URL="your-mongodb-connection-string"
+
+   # Auth0
+   AUTH0_SECRET="your-auth0-secret"
+   AUTH0_DOMAIN="your-auth0-domain"
+   AUTH0_CLIENT_ID="your-auth0-client-id"
+   AUTH0_CLIENT_SECRET="your-auth0-client-secret"
+
+   # AWS S3 (Optional - for SBOM storage)
+   AWS_ACCESS_KEY_ID="your-aws-access-key"
+   AWS_SECRET_ACCESS_KEY="your-aws-secret-key"
+   AWS_REGION="us-east-1"
+   AWS_S3_BUCKET_NAME="autothreat-sboms"
+   ```
+
+4. **Database Setup**
+   ```bash
+   npm run db:push
+   npm run db:generate
+   ```
+
+5. **AWS S3 Setup** (Optional)
+   - Follow the setup guide in `AWS_S3_SETUP.md`
+   - Test the configuration: `node scripts/test-s3.js`
+
+### Development
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000) to view the application.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### Building
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+npm run build
+npm start
+```
 
-## Learn More
+## Project Structure
 
-To learn more about Next.js, take a look at the following resources:
+```
+├── app/                    # Next.js app directory
+│   ├── api/               # API routes
+│   ├── (authenticated)/   # Protected pages
+│   └── (auth)/           # Authentication pages
+├── components/            # Reusable UI components
+├── lib/                  # Utility libraries
+├── prisma/               # Database schema
+└── scripts/              # Utility scripts
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## API Documentation
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+### Authentication
+All API routes use Bearer token authentication:
+```
+Authorization: Bearer your-api-token
+```
 
-## Deploy on Vercel
+### Endpoints
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+- `GET /api/tokens` - List user tokens
+- `POST /api/tokens` - Create new token
+- `DELETE /api/tokens/:id` - Delete token
+- `POST /api/sbom/sync` - Sync SBOM data
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## GitHub Actions
+
+The project includes a GitHub Action for automated security scanning:
+
+```yaml
+- uses: harshsoni-harsh/autothreat-action@main
+  with:
+    path: '.'
+    api-key: ${{ secrets.AUTO_THREAT_API_KEY }}
+```
+
+## Contributing
+
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Run tests
+5. Submit a pull request

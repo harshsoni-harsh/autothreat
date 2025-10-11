@@ -1,0 +1,7 @@
+# Cursor/VS Code ignore patterns
+.env
+.env.local
+.env.*.local
+.env.keys
+secrets/
+config/secrets.json
