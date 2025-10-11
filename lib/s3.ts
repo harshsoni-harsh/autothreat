@@ -1,4 +1,4 @@
-import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3'
+import { S3Client, PutObjectCommand, DeleteObjectCommand } from '@aws-sdk/client-s3'
 
 class S3Service {
     private s3Client: S3Client | null = null
@@ -74,6 +74,26 @@ class S3Service {
         } catch (error) {
             console.error('Error uploading file to S3:', error)
             throw new Error('Failed to upload file to storage')
+        }
+    }
+
+    async deleteSBOM(projectId: string, sbomId: string): Promise<void> {
+        if (!this.s3Client) {
+            throw new Error('AWS S3 is not configured. Please set AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, and AWS_S3_BUCKET_NAME environment variables.')
+        }
+
+        const key = `sboms/${projectId}/${sbomId}.json`
+
+        try {
+            const command = new DeleteObjectCommand({
+                Bucket: this.bucketName,
+                Key: key,
+            })
+
+            await this.s3Client.send(command)
+        } catch (error) {
+            console.error('Error deleting SBOM from S3:', error)
+            throw new Error('Failed to delete SBOM from storage')
         }
     }
 

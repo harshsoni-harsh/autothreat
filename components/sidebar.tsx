@@ -17,16 +17,16 @@ export function Sidebar({ user }: SidebarProps) {
                 <span className="text-lg font-semibold">Autothreat</span>
             </div>
             <nav className="mt-6 flex-1 space-y-1">
-                <Link href="#" className="block rounded-md px-3 py-2 hover:bg-accent">
-                    Overview
+                <Link href="/dashboard" className="block rounded-md px-3 py-2 hover:bg-accent">
+                    Dashboard
                 </Link>
-                <Link href="#" className="block rounded-md px-3 py-2 hover:bg-accent">
+                <Link href="/projects" className="block rounded-md px-3 py-2 hover:bg-accent">
                     Projects
                 </Link>
                 <Link href="#" className="block rounded-md px-3 py-2 hover:bg-accent">
                     Vulnerabilities
                 </Link>
-                <Link href="#" className="block rounded-md px-3 py-2 hover:bg-accent">
+                <Link href="/reports" className="block rounded-md px-3 py-2 hover:bg-accent">
                     Reports
                 </Link>
             </nav>
