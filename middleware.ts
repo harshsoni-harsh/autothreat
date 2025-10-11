@@ -8,13 +8,20 @@ export async function middleware(request: NextRequest) {
     return authRes;
   }
 
-  // public routes
-  if (request.nextUrl.pathname === ("/")) {
+  const publicRoutes = ["/", "/logo.png", "/favicon.ico"];
+  if (publicRoutes.includes(request.nextUrl.pathname)) {
     return authRes;
   }
 
+  const allowedApiRoutes = ["/api/docs/", "/api/sbom/sync/"];
+  for (const route of allowedApiRoutes) {
+    if (request.nextUrl.pathname.startsWith(route)) {
+      return authRes;
+    }
+  }
+
   const { origin } = new URL(request.url)
-  const session = await auth0.getSession()
+  const session = await auth0.getSession(request)
 
   if (!session) {
     return NextResponse.redirect(`${origin}/auth/login`)

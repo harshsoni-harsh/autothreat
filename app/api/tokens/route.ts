@@ -63,7 +63,7 @@ export async function POST(request: NextRequest) {
         }
 
         // Generate a unique token
-        const token = `${Date.now()}_${Math.random().toString(36).substring(2, 15)}`
+        const token = `${Math.random().toString(36).substring(2, 15)}_${Date.now()}`
 
         // Create the token
         const newToken = await prisma.token.create({

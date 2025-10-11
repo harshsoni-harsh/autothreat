@@ -157,7 +157,6 @@ export default function ProfilePage() {
                             <h3 className="text-2xl font-semibold">{user?.name || "User"}</h3>
                             <p className="text-muted-foreground">{user?.email || "No email"}</p>
                             <div className="flex gap-2">
-                                <Badge variant="default">Auth0</Badge>
                                 {user?.sub && (
                                     <Badge variant="outline">
                                         {user.sub.startsWith('google') ? 'Google' :

@@ -15,21 +15,21 @@ export default async function Layout({
         redirect('/auth/login');
     }
     const user = session.user;
-    // try {
-    //     const existingUser = await prisma.user.findFirst({
-    //         where: { email: user.email },
-    //     })
-    //     if (!existingUser) {
-    //         await prisma.user.create({
-    //             data: {
-    //                 email: user.email!,
-    //                 name: user.name || "User",
-    //             },
-    //         });
-    //     }
-    // } catch (error) {
-    //     console.error("Error updating lastLoggedIn:", error);
-    // }
+    try {
+        const existingUser = await prisma.user.findFirst({
+            where: { email: user.email },
+        })
+        if (!existingUser) {
+            await prisma.user.create({
+                data: {
+                    email: user.email!,
+                    name: user.name || "User",
+                },
+            });
+        }
+    } catch (error) {
+        console.error("Error updating lastLoggedIn:", error);
+    }
 
     return (
         <div className="flex min-h-screen max-w-screen">
