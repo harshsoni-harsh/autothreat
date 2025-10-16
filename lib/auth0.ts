@@ -1,7 +1,7 @@
 // lib/auth0.js
 
 import { Auth0Client } from "@auth0/nextjs-auth0/server";
-
+import jwt from "jsonwebtoken";
 // Initialize the Auth0 client 
 export const auth0 = new Auth0Client({
   // Options are loaded from environment variables by default
@@ -19,3 +19,12 @@ export const auth0 = new Auth0Client({
     audience: process.env.AUTH0_AUDIENCE,
   }
 });
+export function verifyAuth0Token(token: string) {
+  try {
+    const decoded = jwt.decode(token, { complete: true });
+    if (!decoded) return null;
+    return decoded.payload;
+  } catch (err) {
+    return null;
+  }
+};

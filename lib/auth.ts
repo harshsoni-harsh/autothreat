@@ -6,7 +6,7 @@ export function generateToken(payload: object) {
 export function verifyToken(token: string) {
   try {
     return jwt.verify(token, SECRET);
-  } catch {
+  } catch (err) {
     return null;
   }
 }

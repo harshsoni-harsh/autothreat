@@ -1,43 +1,63 @@
-import { NextResponse, type NextRequest } from "next/server";
-import { auth0 } from "@/lib/auth0";
+import { NextRequest, NextResponse } from "next/server";
+import { rateLimiter } from "@/lib/ratelimiter";
+import { verifyToken } from "@/lib/auth";
+import { verifyAuth0Token, auth0 } from "@/lib/auth0";
 
-export async function middleware(request: NextRequest) {
-  const authRes = await auth0.middleware(request);
+export async function middleware(req: NextRequest) {
+  const url = req.nextUrl.pathname;
+  const publicRoutes = [
+    "/api/token",          
+    "/api/docs",
+    "/api/sbom/sync",
+    "/",
+    "/logo.png"
+  ];
 
-  if (request.nextUrl.pathname.startsWith("/auth")) {
-    return authRes;
+  if (publicRoutes.some(route => url.startsWith(route))) {
+    return NextResponse.next();
   }
 
-  const publicRoutes = ["/", "/logo.png", "/favicon.ico"];
-  if (publicRoutes.includes(request.nextUrl.pathname)) {
-    return authRes;
-  }
-
-  const allowedApiRoutes = ["/api/docs/", "/api/sbom/sync/"];
-  for (const route of allowedApiRoutes) {
-    if (request.nextUrl.pathname.startsWith(route)) {
-      return authRes;
+  if (!url.startsWith("/api")) {
+    const session = await auth0.getSession(req);
+    if (!session) {
+      return NextResponse.redirect(new URL("/api/auth/login", req.url));
     }
+    return NextResponse.next();
+  }
+  const ip = req.headers.get("x-forwarded-for")?.split(",")[0] ?? 
+             req.headers.get("x-real-ip") ?? 
+             "unknown";
+             
+  if (!rateLimiter(ip)) {
+    return NextResponse.json({ error: "Rate limit exceeded" }, { status: 429 });
+  }
+  const authHeader = req.headers.get("authorization");
+  const token = authHeader?.split(" ")[1];
+  if (!token) {
+    return NextResponse.json({ error: "Missing token" }, { status: 401 });
   }
 
-  const { origin } = new URL(request.url)
-  const session = await auth0.getSession(request)
-
-  if (!session) {
-    return NextResponse.redirect(`${origin}/auth/login`)
+  let decoded = verifyToken(token);
+  
+  if (!decoded) {
+    decoded = verifyAuth0Token(token);
   }
 
-  return authRes
+  if (!decoded) {
+    return NextResponse.json({ error: "Invalid token" }, { status: 403 });
+  }
+
+  return NextResponse.next();
 }
 
 export const config = {
   matcher: [
     /*
-     * Match all request paths except for the ones starting with:
+     * Match all request paths except:
      * - _next/static (static files)
      * - _next/image (image optimization files)
-     * - favicon.ico, sitemap.xml, robots.txt (metadata files)
+     * - favicon.ico (favicon file)
      */
-    "/((?!_next/static|_next/image|favicon.ico|sitemap.xml|robots.txt).*)",
+    "/((?!_next/static|_next/image|favicon.ico).*)",
   ],
 };
