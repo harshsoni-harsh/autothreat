@@ -32,7 +32,7 @@ export default async function Layout({
     }
 
     return (
-        <div className="flex min-h-screen max-w-screen">
+        <div className="flex min-h-screen max-w-screen max-h-screen">
             <Sidebar user={{ name: user?.name, email: user?.email, picture: user?.picture as string | undefined }} />
             <main className="flex-1 p-6 overflow-auto">
                 {children}

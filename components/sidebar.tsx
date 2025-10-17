@@ -11,7 +11,7 @@ type SidebarProps = {
 
 export function Sidebar({ user }: SidebarProps) {
     return (
-        <aside className="flex min-h-full w-64 flex-col border-r bg-sidebar p-4">
+        <aside className="flex min-h-full overflow-auto w-64 flex-col border-r bg-sidebar p-4">
             <div className="flex items-center gap-2 px-2">
                 <Image loading="eager" src="/logo.png" alt="Logo" width={32} height={32} className="rounded" />
                 <span className="text-lg font-semibold">Autothreat</span>

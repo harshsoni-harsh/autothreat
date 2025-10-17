@@ -233,7 +233,7 @@ export default function ProjectsPage() {
                 <div>
                     <h1 className="text-3xl font-bold">Projects</h1>
                     <p className="text-muted-foreground">
-                        Manage your software projects and their security bill of materials
+                        Manage your software projects and their software bill of materials
                     </p>
                 </div>
                 <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
@@ -248,7 +248,7 @@ export default function ProjectsPage() {
                             <DialogHeader>
                                 <DialogTitle>Create New Project</DialogTitle>
                                 <DialogDescription>
-                                    Add a new project to track its security bill of materials and vulnerabilities.
+                                    Add a new project to track its software bill of materials and vulnerabilities.
                                 </DialogDescription>
                             </DialogHeader>
                             <div className="grid gap-4 py-4">
@@ -492,7 +492,7 @@ export default function ProjectsPage() {
                         <FileText className="h-12 w-12 text-muted-foreground mb-4" />
                         <h3 className="text-lg font-semibold mb-2">No projects yet</h3>
                         <p className="text-muted-foreground text-center mb-4">
-                            Create your first project to start tracking security bill of materials and vulnerabilities.
+                            Create your first project to start tracking software bill of materials and vulnerabilities.
                         </p>
                         <Button onClick={() => setIsDialogOpen(true)}>
                             <Plus className="mr-2 h-4 w-4" />
