@@ -9,12 +9,14 @@ datasource db {
 }
 
 model User {
-  id    String  @id @default(auto()) @map("_id") @db.ObjectId
-  name  String
-  email String  @unique
+  id       String  @id @default(auto()) @map("_id") @db.ObjectId
+  auth0Id  String? @unique @map("auth0_id") // Auth0 user ID
+  name     String
+  email    String  @unique
 
-  projects Project[]
-  tokens   Token[]
+  projects   Project[]
+  tokens     Token[]
+  rateLimits RateLimit[]
 }
 
 model Token {
@@ -56,4 +58,20 @@ model Sbom {
   vulnerabilitiesFound Int      @map("vulnerabilities_found")
 
   project Project @relation(fields: [projectId], references: [id])
+}
+
+// NEW: Rate Limiting Model
+model RateLimit {
+  id           String   @id @default(auto()) @map("_id") @db.ObjectId
+  userId       String   @db.ObjectId
+  endpoint     String   // e.g., "tokens", "protected", "global"
+  requestCount Int      @default(0) @map("request_count")
+  windowStart  DateTime @default(now()) @map("window_start")
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, endpoint])
+  @@index([userId, endpoint, windowStart])
 }

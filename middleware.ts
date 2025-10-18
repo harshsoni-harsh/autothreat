@@ -1,63 +1,58 @@
-import { NextRequest, NextResponse } from "next/server";
-import { rateLimiter } from "@/lib/ratelimiter";
-import { verifyToken } from "@/lib/auth";
-import { verifyAuth0Token, auth0 } from "@/lib/auth0";
+import { NextResponse, type NextRequest } from "next/server";
+import { checkIpRateLimit } from "@/lib/rateLimiterEdge";
+import { auth0 } from "@/lib/auth0";
 
-export async function middleware(req: NextRequest) {
-  const url = req.nextUrl.pathname;
-  const publicRoutes = [
-    "/api/token",          
-    "/api/docs",
-    "/api/sbom/sync",
-    "/",
-    "/logo.png"
-  ];
+export async function middleware(request: NextRequest) {
+  // 1️⃣ Global IP rate limiting
+  const ip =
+    request.headers.get("x-forwarded-for")?.split(",")[0] ||
+    request.headers.get("x-real-ip") ||
+    "unknown";
 
-  if (publicRoutes.some(route => url.startsWith(route))) {
+  const { allowed, remaining, reset } = await checkIpRateLimit(ip);
+  if (!allowed) {
+    return NextResponse.json(
+      { error: "Too many requests", resetAfter: reset },
+      { status: 429 }
+    );
+  }
+
+  // 2️⃣ Let Auth0 handle /auth paths
+  if (request.nextUrl.pathname.startsWith("/auth")) {
+    return auth0.middleware(request); // Important!
+  }
+
+  // 3️⃣ Allow public/static paths
+  const publicRoutes = ["/", "/logo.png", "/favicon.ico"];
+  if (publicRoutes.includes(request.nextUrl.pathname)) {
     return NextResponse.next();
   }
 
-  if (!url.startsWith("/api")) {
-    const session = await auth0.getSession(req);
-    if (!session) {
-      return NextResponse.redirect(new URL("/api/auth/login", req.url));
+  // 4️⃣ Allow specific API routes
+  const allowedApiRoutes = ["/api/docs/", "/api/sbom/sync/"];
+  for (const route of allowedApiRoutes) {
+    if (request.nextUrl.pathname.startsWith(route)) {
+      return NextResponse.next();
     }
-    return NextResponse.next();
-  }
-  const ip = req.headers.get("x-forwarded-for")?.split(",")[0] ?? 
-             req.headers.get("x-real-ip") ?? 
-             "unknown";
-             
-  if (!rateLimiter(ip)) {
-    return NextResponse.json({ error: "Rate limit exceeded" }, { status: 429 });
-  }
-  const authHeader = req.headers.get("authorization");
-  const token = authHeader?.split(" ")[1];
-  if (!token) {
-    return NextResponse.json({ error: "Missing token" }, { status: 401 });
   }
 
-  let decoded = verifyToken(token);
-  
-  if (!decoded) {
-    decoded = verifyAuth0Token(token);
+  // 5️⃣ Auth0 session verification for all other routes
+  const session = await auth0.getSession(request);
+  if (!session) {
+    const { origin } = new URL(request.url);
+    return NextResponse.redirect(`${origin}/api/auth/login`); // use API route directly
   }
 
-  if (!decoded) {
-    return NextResponse.json({ error: "Invalid token" }, { status: 403 });
-  }
-
-  return NextResponse.next();
+  // 6️⃣ Attach user headers
+  const res = NextResponse.next();
+  res.headers.set("x-user-id", session.user.sub ?? "");
+  res.headers.set("x-user-email", session.user.email ?? "");
+  res.headers.set("x-rate-remaining", remaining.toString());
+  return res;
 }
 
 export const config = {
   matcher: [
-    /*
-     * Match all request paths except:
-     * - _next/static (static files)
-     * - _next/image (image optimization files)
-     * - favicon.ico (favicon file)
-     */
-    "/((?!_next/static|_next/image|favicon.ico).*)",
+    "/((?!_next/static|_next/image|favicon.ico|sitemap.xml|robots.txt).*)",
   ],
 };

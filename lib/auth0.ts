@@ -1,8 +1,33 @@
-// lib/auth0.js
-
+// lib/auth0.ts (Edge-safe, minimal verifier using jose)
+import { jwtVerify } from 'jose';
+import { createRemoteJWKSet } from 'jose';
 import { Auth0Client } from "@auth0/nextjs-auth0/server";
-import jwt from "jsonwebtoken";
-// Initialize the Auth0 client 
+const AUTH0_DOMAIN = process.env.AUTH0_DOMAIN;
+const AUTH0_AUDIENCE = process.env.AUTH0_AUDIENCE;
+const ISSUER = `https://${AUTH0_DOMAIN}/`;
+
+// if (!AUTH0_DOMAIN || !AUTH0_AUDIENCE) {
+//   throw new Error('AUTH0_DOMAIN and AUTH0_AUDIENCE must be set');
+// }
+
+const JWKS = createRemoteJWKSet(new URL(`${ISSUER}.well-known/jwks.json`));
+
+export async function verifyAuth0Token(token: string) {
+  // throws on invalid token
+  const { payload } = await jwtVerify(token, JWKS, {
+    issuer: ISSUER,
+    audience: AUTH0_AUDIENCE,
+  });
+
+  // payload is the decoded JWT claims
+  return payload;
+}
+
+/**
+ * Minimal getSession for middleware:
+ * - Accepts Bearer token from Authorization header.
+ * - Returns { user: { sub, email, name } } or null.
+ */
 export const auth0 = new Auth0Client({
   // Options are loaded from environment variables by default
   // Ensure necessary environment variables are properly set
@@ -19,12 +44,23 @@ export const auth0 = new Auth0Client({
     audience: process.env.AUTH0_AUDIENCE,
   }
 });
-export function verifyAuth0Token(token: string) {
+export async function getSessionFromRequest(request: Request) {
+  const auth = request.headers.get('authorization') || '';
+  if (!auth.startsWith('Bearer ')) return null;
+
+  const token = auth.split(' ')[1];
   try {
-    const decoded = jwt.decode(token, { complete: true });
-    if (!decoded) return null;
-    return decoded.payload;
+    const payload = await verifyAuth0Token(token);
+    return {
+      user: {
+        sub: (payload as any).sub,
+        email: (payload as any).email,
+        name: (payload as any).name,
+      },
+      claims: payload,
+    };
   } catch (err) {
+    // invalid token
     return null;
   }
-};
+}
