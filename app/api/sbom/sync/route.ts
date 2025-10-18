@@ -67,9 +67,9 @@ export async function POST(request: NextRequest) {
 
         // Extract SBOM metadata
         const sbomId = sbom.SPDXID || sbom.id || `sbom_${Date.now()}`
-        const format = sbom.spdxVersion ? 'SPDX' : 'Unknown'
+        const format = metadata.format
         const tool = metadata?.source || 'github-action'
-        const commitHash = metadata?.commitHash || 'unknown'
+        const commitHash = metadata.commit_hash
         const componentsCount = (sbom.packages?.length ?? sbom.components.length) || 0
         const vulnerabilitiesFound = 0
 

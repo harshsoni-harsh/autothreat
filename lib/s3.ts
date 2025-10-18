@@ -42,9 +42,7 @@ class S3Service {
 
             await this.s3Client.send(command)
 
-            // Return the S3 URL
-            const region = process.env.AWS_REGION || 'us-east-1'
-            return `https://${this.bucketName}.s3.${region}.amazonaws.com/${key}`
+            return `s3://${this.bucketName}/${key}`
 
         } catch (error) {
             console.error('Error uploading SBOM to S3:', error)
@@ -67,9 +65,7 @@ class S3Service {
 
             await this.s3Client.send(command)
 
-            // Return the S3 URL
-            const region = process.env.AWS_REGION || 'us-east-1'
-            return `https://${this.bucketName}.s3.${region}.amazonaws.com/${key}`
+            return `s3://${this.bucketName}/${key}`
 
         } catch (error) {
             console.error('Error uploading file to S3:', error)
