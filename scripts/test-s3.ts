@@ -36,7 +36,7 @@ async function testS3Connection() {
         console.log(`📍 Test file URL: ${url}`)
         console.log('\n🎉 AWS S3 configuration is working correctly!')
 
-    } catch (error) {
+    } catch (error: any) {
         console.error('❌ S3 test failed:', error.message)
         console.log('\n🔧 Troubleshooting tips:')
         console.log('1. Check your AWS credentials are correct')
