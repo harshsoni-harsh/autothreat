@@ -11,22 +11,22 @@ type SidebarProps = {
 
 export function Sidebar({ user }: SidebarProps) {
     return (
-        <aside className="flex min-h-full w-64 flex-col border-r bg-sidebar p-4">
+        <aside className="flex min-h-full overflow-auto w-64 flex-col border-r bg-sidebar p-4">
             <div className="flex items-center gap-2 px-2">
                 <Image loading="eager" src="/logo.png" alt="Logo" width={32} height={32} className="rounded" />
                 <span className="text-lg font-semibold">Autothreat</span>
             </div>
             <nav className="mt-6 flex-1 space-y-1">
-                <Link href="#" className="block rounded-md px-3 py-2 hover:bg-accent">
-                    Overview
+                <Link href="/dashboard" className="block rounded-md px-3 py-2 hover:bg-accent">
+                    Dashboard
                 </Link>
-                <Link href="#" className="block rounded-md px-3 py-2 hover:bg-accent">
+                <Link href="/projects" className="block rounded-md px-3 py-2 hover:bg-accent">
                     Projects
                 </Link>
-                <Link href="#" className="block rounded-md px-3 py-2 hover:bg-accent">
+                <Link href="/vulnerabilities" className="block rounded-md px-3 py-2 hover:bg-accent">
                     Vulnerabilities
                 </Link>
-                <Link href="#" className="block rounded-md px-3 py-2 hover:bg-accent">
+                <Link href="/reports" className="block rounded-md px-3 py-2 hover:bg-accent">
                     Reports
                 </Link>
             </nav>
